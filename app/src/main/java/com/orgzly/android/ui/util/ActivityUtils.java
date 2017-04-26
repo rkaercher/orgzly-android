@@ -23,7 +23,7 @@ import com.orgzly.android.ui.fragments.FilterFragment;
 import com.orgzly.android.ui.fragments.FiltersFragment;
 import com.orgzly.android.ui.fragments.NoteFragment;
 import com.orgzly.android.ui.fragments.QueryFragment;
-import com.orgzly.android.ui.fragments.ReposFragment;
+import com.orgzly.android.ui.fragments.repo.ReposFragment;
 import com.orgzly.android.ui.fragments.SettingsFragment;
 import com.orgzly.android.util.LogUtils;
 

@@ -403,4 +403,9 @@
     <string name="sync_button_sample">Last sync: Jan 01, 01:01</string>
     <string name="synced_rook_mtime_sample">Jul 3, 2013 9:45:37 PM</string>
     <string name="synced_rook_revision_sample">42f97fe238</string>
+    <string name="git_repository">Git Repository</string>
+    <string name="git">Git</string>
+    <string name="fragment_repo_git_gituri_desc">Git uri (e.g. git@example.com:/path/to/repo)</string>
+    <string name="fragment_repo_git_public_key_desc">Public key</string>
+    <string name="fragment_repo_git_private_key_desc">Private Key</string>
 </resources>

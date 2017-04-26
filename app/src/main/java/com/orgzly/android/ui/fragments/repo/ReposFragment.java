@@ -1,4 +1,4 @@
-package com.orgzly.android.ui.fragments;
+package com.orgzly.android.ui.fragments.repo;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -37,7 +37,9 @@ import com.orgzly.android.util.UriUtils;
 public class ReposFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = ReposFragment.class.getName();
 
-    /** Name used for {@link android.app.FragmentManager}. */
+    /**
+     * Name used for {@link android.app.FragmentManager}.
+     */
     public static final String FRAGMENT_TAG = ReposFragment.class.getName();
 
     private SimpleCursorAdapter mListAdapter;
@@ -133,12 +135,12 @@ public class ReposFragment extends ListFragment implements LoaderManager.LoaderC
 
     private void setupAdapter() {
         /* Column field names to be bound. */
-        String[] columns = new String[] {
+        String[] columns = new String[]{
                 ProviderContract.Repos.Param.REPO_URL
         };
 
         /* Views which the data will be bound to. */
-        int[] to = new int[] {
+        int[] to = new int[]{
                 R.id.item_repo_url
         };
 
@@ -158,7 +160,7 @@ public class ReposFragment extends ListFragment implements LoaderManager.LoaderC
 
                 switch (view.getId()) {
                     case R.id.item_repo_url:
-                        if (! cursor.isNull(columnIndex)) {
+                        if (!cursor.isNull(columnIndex)) {
                             textView = (TextView) view;
                             textView.setText(UriUtils.friendlyUri(cursor.getString(columnIndex)));
                         }
@@ -208,7 +210,7 @@ public class ReposFragment extends ListFragment implements LoaderManager.LoaderC
 
         inflater.inflate(R.menu.repos_actions, menu);
 
-        if (! BuildConfig.IS_DROPBOX_ENABLED) {
+        if (!BuildConfig.IS_DROPBOX_ENABLED) {
             menu.findItem(R.id.repos_options_menu_item_new).getSubMenu()
                     .removeItem(R.id.repos_options_menu_item_new_dropbox);
         }
@@ -221,6 +223,10 @@ public class ReposFragment extends ListFragment implements LoaderManager.LoaderC
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.repos_options_menu_item_new_dropbox:
+                mListener.onRepoNewRequest(item.getItemId());
+                return true;
+
+            case R.id.repos_options_menu_item_new_git:
                 mListener.onRepoNewRequest(item.getItemId());
                 return true;
 
@@ -247,7 +253,7 @@ public class ReposFragment extends ListFragment implements LoaderManager.LoaderC
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-		/* Get ID of the item. */
+        /* Get ID of the item. */
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 
         switch (item.getItemId()) {
@@ -294,7 +300,9 @@ public class ReposFragment extends ListFragment implements LoaderManager.LoaderC
 
     public interface ReposFragmentListener {
         void onRepoNewRequest(int id);
+
         void onRepoDeleteRequest(long id);
+
         void onRepoEditRequest(long id);
     }
 }

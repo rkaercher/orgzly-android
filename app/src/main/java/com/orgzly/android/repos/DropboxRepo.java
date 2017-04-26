@@ -58,6 +58,11 @@ public class DropboxRepo implements Repo {
     }
 
     @Override
+    public void syncStart() {
+
+    }
+
+    @Override
     public String toString() {
         return repoUri.toString();
     }

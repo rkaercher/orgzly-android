@@ -145,7 +145,7 @@ public class SyncService extends Service {
 
     private boolean reposRequireStoragePermission(Collection<Repo> repos) {
         for (Repo repo: repos) {
-            if (DirectoryRepo.SCHEME.equals(repo.getUri().getScheme())) {
+            if (DirectoryRepo.SCHEME.equals(repo.getUri().getScheme())) { // TODO: 10.04.17 git repo here too 
                 return true;
             }
         }
@@ -222,6 +222,11 @@ public class SyncService extends Service {
 
         @Override
         protected Exception doInBackground(Void... params) { /* Executing on a different thread. */
+
+            // allow repos to update their local caches
+            for(Repo repo : shelf.getAllRepos().values()) {
+                repo.syncStart();
+            }
 
             /* Get the list of local and remote books from all repositories.
              * Group them by name.

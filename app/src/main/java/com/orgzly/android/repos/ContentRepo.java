@@ -188,6 +188,11 @@ public class ContentRepo implements Repo {
     }
 
     @Override
+    public void syncStart() {
+
+    }
+
+    @Override
     public String toString() {
         return getUri().toString();
     }
