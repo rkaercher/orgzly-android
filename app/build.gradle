@@ -58,7 +58,7 @@ android {
              * Disable Dropbox.
              * Properties file which contains the required API key is not included with the code.
              */
-            buildConfigField "boolean", "IS_DROPBOX_ENABLED", "false"
+            buildConfigField "boolean", "IS_DROPBOX_ENABLED", "true"
 
             buildConfigField "String", "VERSION_NAME_SUFFIX", '" (fdroid)"'
         }
@@ -104,6 +104,8 @@ dependencies {
     compile "com.android.support:cardview-v7:$android_support_version"
     compile "com.android.support:recyclerview-v7:$android_support_version"
     compile "com.android.support:design:$android_support_version"
+    compile "org.eclipse.jgit:org.eclipse.jgit:$jgit_version"
+    compile "com.jcraft:jsch:$jsch_version"
 
     androidTestCompile "com.android.support:support-annotations:$android_support_version"
 

@@ -1,4 +1,4 @@
-package com.orgzly.android.ui.fragments;
+package com.orgzly.android.ui.fragments.repo;
 
 import android.content.Context;
 import android.net.Uri;
@@ -29,17 +29,17 @@ import com.orgzly.android.util.LogUtils;
 import com.orgzly.android.util.MiscUtils;
 
 
-public class DirectoryRepoFragment extends RepoFragment {
+public class DirectoryRepoFragment extends RepoFragment implements RepoFragmentWithFileUri {
     private static final String TAG = DirectoryRepoFragment.class.getName();
 
     private static final String ARG_REPO_ID = "repo_id";
 
     /** Name used for {@link android.app.FragmentManager}. */
     public static final String FRAGMENT_TAG = DirectoryRepoFragment.class.getName();
+    protected Uri mSelectedUri;
 
     private DirectoryRepoFragmentListener mListener;
 
-    private Uri mSelectedUri;
     private TextInputLayout directoryInputLayout;
     private EditText mUriView;
 
@@ -150,9 +150,9 @@ public class DirectoryRepoFragment extends RepoFragment {
         }
 
         if (uri != null) {
-            mListener.onBrowseDirectories(Uri.parse(uri).getPath());
+            mListener.onBrowseDirectories(Uri.parse(uri).getPath(), null);
         } else {
-            mListener.onBrowseDirectories(null);
+            mListener.onBrowseDirectories(null, null);
         }
     }
 
@@ -267,11 +267,11 @@ public class DirectoryRepoFragment extends RepoFragment {
         getActivity().getMenuInflater().inflate(R.menu.repos_context, menu);
     }
 
-    public void updateUri(Uri uri) {
+    @Override
+    public void updateFileUri(Uri uri, String TAG) {
         mSelectedUri = uri;
     }
 
     public interface DirectoryRepoFragmentListener extends RepoFragmentListener {
-        void onBrowseDirectories(String dir);
     }
 }

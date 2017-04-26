@@ -41,5 +41,11 @@ public interface Repo {
 
     void delete(Uri uri) throws IOException;
 
+    /**
+     * Gets called once before syncing any books to allow the repository to update a cached
+     * representation of the remote content.
+     */
+    void syncStart();
+
     String toString();
 }

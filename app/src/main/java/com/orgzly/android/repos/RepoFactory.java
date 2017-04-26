@@ -33,6 +33,9 @@ public class RepoFactory {
 
                     case MockRepo.SCHEME:
                         return new MockRepo(context, uriString);
+
+                    case GitRepo.SCHEME:
+                        return new GitRepo(context, uriString);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

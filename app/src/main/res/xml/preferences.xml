@@ -9,6 +9,16 @@
             android:defaultValue="@bool/pref_default_is_reverse_click_action"/>
     </PreferenceCategory>
 
+
+    <PreferenceCategory android:title="@string/sync">
+        <Preference android:title="@string/repos_preference_title" android:key="@string/pref_key_repos">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetPackage="com.orgzly"
+                android:targetClass="com.orgzly.android.ui.ReposActivity"/>
+        </Preference>
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/look_and_feel">
         <com.orgzly.android.prefs.ListPreferenceWithValueAsSummary
             android:key="@string/pref_key_color_scheme"
@@ -188,13 +198,6 @@
             android:defaultValue="@bool/pref_default_separate_header_and_content_with_new_line"/>
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/sync">
-        <Preference android:title="@string/repos_preference_title" android:key="@string/pref_key_repos">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:targetPackage="com.orgzly"
-                android:targetClass="com.orgzly.android.ui.ReposActivity"/>
-        </Preference>
 
         <CheckBoxPreference
             android:title="@string/sync_after_preference_title"
@@ -215,7 +218,6 @@
             android:key="@string/pref_key_use_reminders_for_scheduled_times"
             android:title="@string/pref_title_scheduled_times"
             android:defaultValue="@bool/pref_default_value_use_reminders_for_scheduled_times"/>
-    </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/app">
         <Preference

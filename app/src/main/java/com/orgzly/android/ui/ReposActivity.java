@@ -19,11 +19,14 @@ import com.orgzly.android.repos.DropboxRepo;
 import com.orgzly.android.repos.MockRepo;
 import com.orgzly.android.repos.Repo;
 import com.orgzly.android.repos.RepoFactory;
+import com.orgzly.android.sync.GitSync;
 import com.orgzly.android.ui.dialogs.SimpleOneLinerDialog;
-import com.orgzly.android.ui.fragments.DirectoryRepoFragment;
-import com.orgzly.android.ui.fragments.DropboxRepoFragment;
+import com.orgzly.android.ui.fragments.repo.DirectoryRepoFragment;
+import com.orgzly.android.ui.fragments.repo.DropboxRepoFragment;
+import com.orgzly.android.ui.fragments.repo.GitRepoFragment;
 import com.orgzly.android.ui.fragments.browser.FileBrowserFragment;
-import com.orgzly.android.ui.fragments.ReposFragment;
+import com.orgzly.android.ui.fragments.repo.RepoFragmentWithFileUri;
+import com.orgzly.android.ui.fragments.repo.ReposFragment;
 import com.orgzly.android.ui.util.ActivityUtils;
 import com.orgzly.android.util.LogUtils;
 import com.orgzly.android.util.UriUtils;
@@ -52,6 +55,8 @@ public class ReposActivity extends CommonActivity
     private Shelf mShelf;
 
     private DropboxClient mDropboxClient;
+    private String currentFileBrowserTag;
+    private String currentFragmentTag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,6 +153,9 @@ public class ReposActivity extends CommonActivity
         } else if (id == R.id.repos_options_menu_item_new_external_storage_directory) {
             displayRepoFragment(DirectoryRepoFragment.getInstance(), DirectoryRepoFragment.FRAGMENT_TAG);
 
+        } else if (id == R.id.repos_options_menu_item_new_git) {
+            displayRepoFragment(GitRepoFragment.getInstance(), GitRepoFragment.FRAGMENT_TAG);
+
         } else {
             throw new IllegalArgumentException("Unknown repo menu item clicked: " + id);
         }
@@ -186,6 +194,7 @@ public class ReposActivity extends CommonActivity
     }
 
     private void displayRepoFragment(Fragment fragment, String tag) {
+        currentFragmentTag = tag;
         getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(null)
@@ -222,13 +231,16 @@ public class ReposActivity extends CommonActivity
             }
         }
     }
+
     @Override
     public boolean isDropboxLinked() {
         return mDropboxClient.isLinked();
     }
 
     @Override
-    public void onBrowseDirectories(String dir) {
+    public void onBrowseDirectories(String dir, String TAG) {
+        currentFileBrowserTag = TAG;
+
         // Open the browser
         getSupportFragmentManager()
                 .beginTransaction()
@@ -239,6 +251,7 @@ public class ReposActivity extends CommonActivity
 
     @Override
     public void onBrowserCancel() {
+        currentFileBrowserTag = null;
         getSupportFragmentManager().popBackStack();
     }
 
@@ -254,13 +267,13 @@ public class ReposActivity extends CommonActivity
 
     @Override
     public void onBrowserUse(String item) {
-        DirectoryRepoFragment fragment =
-                (DirectoryRepoFragment) getSupportFragmentManager()
-                        .findFragmentByTag(DirectoryRepoFragment.FRAGMENT_TAG);
+        RepoFragmentWithFileUri fragment =
+                (RepoFragmentWithFileUri) getSupportFragmentManager()
+                        .findFragmentByTag(currentFragmentTag);
 
         Uri uri = UriUtils.uriFromPath(DirectoryRepo.SCHEME, item);
 
-        fragment.updateUri(uri);
+        fragment.updateFileUri(uri, currentFileBrowserTag);
 
         getSupportFragmentManager().popBackStack();
     }
@@ -302,7 +315,7 @@ public class ReposActivity extends CommonActivity
                         grantUriPermission(getPackageName(), treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
                         final int takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                                              Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 
                         getContentResolver().takePersistableUriPermission(treeUri, takeFlags);
                     }
@@ -311,7 +324,7 @@ public class ReposActivity extends CommonActivity
                             (DirectoryRepoFragment) getSupportFragmentManager()
                                     .findFragmentByTag(DirectoryRepoFragment.FRAGMENT_TAG);
 
-                    fragment.updateUri(treeUri);
+                    fragment.updateFileUri(treeUri, null);
                 }
 
                 break;

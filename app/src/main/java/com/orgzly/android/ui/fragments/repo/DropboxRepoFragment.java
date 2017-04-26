@@ -1,4 +1,4 @@
-package com.orgzly.android.ui.fragments;
+package com.orgzly.android.ui.fragments.repo;
 
 import android.app.Activity;
 import android.app.AlertDialog;
