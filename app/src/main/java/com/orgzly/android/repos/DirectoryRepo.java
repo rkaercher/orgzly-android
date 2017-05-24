@@ -35,14 +35,6 @@ public class DirectoryRepo extends LocalDirectoryBasedRepo {
         createDir(getLocalDirectory());
     }
 
-    private void createDir(File dir) throws IOException {
-        if (!dir.isDirectory()) {
-            if (!dir.mkdirs()) {
-                throw new IOException("Failed creating directory " + dir);
-            }
-        }
-    }
-
     @Override
     public boolean requiresConnection() {
         return false;
@@ -56,61 +48,6 @@ public class DirectoryRepo extends LocalDirectoryBasedRepo {
     @Override
     protected Uri getRookUri(File rookFile) {
         return repoUri.buildUpon().appendPath(rookFile.getName()).build();
-    }
-
-    @Override
-    public VersionedRook retrieveBook(Uri uri, File destinationFile) throws IOException {
-        File sourceFile = getFileForUri(uri);
-
-        /* "Download" the file. */
-        MiscUtils.copyFile(sourceFile, destinationFile);
-
-        String rev = String.valueOf(sourceFile.lastModified());
-        long mtime = sourceFile.lastModified();
-
-        return new VersionedRook(repoUri, uri, rev, mtime);
-    }
-
-    @Override
-    public VersionedRook storeBook(File file, String fileName) throws IOException {
-        if (!file.exists()) {
-            throw new FileNotFoundException("File " + file + " does not exist");
-        }
-
-        File destinationFile = new File(getLocalDirectory(), fileName);
-
-        /* Create necessary directories. */
-        createDir(destinationFile.getParentFile());
-
-        String content = MiscUtils.readStringFromFile(file);
-        MiscUtils.writeStringToFile(content, destinationFile);
-
-        String rev = String.valueOf(destinationFile.lastModified());
-        long mtime = destinationFile.lastModified();
-
-        Uri uri = repoUri.buildUpon().appendPath(fileName).build();
-
-        return new VersionedRook(repoUri, uri, rev, mtime);
-    }
-
-    @Override
-    public VersionedRook renameBook(Uri fromUri, String name) throws IOException {
-        File fromFile = getFileForUri(fromUri);
-        Uri newUri = UriUtils.getUriForNewName(fromUri, name);
-        File toFile = new File(newUri.getPath());
-
-        if (toFile.exists()) {
-            throw new IOException("File " + toFile + " already exists");
-        }
-
-        if (!fromFile.renameTo(toFile)) {
-            throw new IOException("Failed renaming " + fromFile + " to " + toFile);
-        }
-
-        String rev = String.valueOf(toFile.lastModified());
-        long mtime = toFile.lastModified();
-
-        return new VersionedRook(repoUri, newUri, rev, mtime);
     }
 
     @Override

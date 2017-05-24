@@ -109,6 +109,13 @@ public class ReposFragment extends ListFragment implements LoaderManager.LoaderC
             }
         });
 
+        view.findViewById(R.id.fragment_repos_git).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onRepoNewRequest(R.id.repos_options_menu_item_new_git);
+            }
+        });
+
         return view;
     }
 

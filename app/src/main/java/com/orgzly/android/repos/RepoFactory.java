@@ -3,8 +3,6 @@ package com.orgzly.android.repos;
 import android.content.Context;
 import android.net.Uri;
 
-import java.io.IOException;
-
 public class RepoFactory {
     public static Repo getFromUri(Context context, Uri uri) {
         return getFromUri(context, uri.toString());
@@ -34,7 +32,7 @@ public class RepoFactory {
                     case MockRepo.SCHEME:
                         return new MockRepo(context, uriString);
 
-                    case GitRepo.SCHEME:
+                    case GitUri.SCHEME:
                         return new GitRepo(context, uriString);
                 }
             } catch (Exception e) {

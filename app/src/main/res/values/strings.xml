@@ -425,4 +425,8 @@
     <string name="fragment_repo_git_gituri_desc">Git uri (e.g. git@example.com:/path/to/repo)</string>
     <string name="fragment_repo_git_public_key_desc">Public key</string>
     <string name="fragment_repo_git_private_key_desc">Private Key</string>
+    <string name="test_login">Test Login</string>
+    <string name="generate_keys">Generate Keys</string>
+    <string name="git_auth_method">Authentication Method</string>
+    <string name="edit_credentials">Edit Credentials</string>
 </resources>

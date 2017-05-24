@@ -1,22 +1,21 @@
 package com.orgzly.android.sync;
 
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.orgzly.android.repos.GitRepo;
+import com.orgzly.android.repos.GitUri;
 
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.LsRemoteCommand;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.errors.UnsupportedCredentialItem;
@@ -37,38 +36,39 @@ import java.io.File;
 import java.io.StringWriter;
 
 public class GitSync {
-    private final GitRepo.Transport transport;
-    private Uri uri;
-    private String REMOTE_URL;
-    private String localPath;
+    private final GitUri uri;
 
     private String TAG = GitSync.class.getName();
 
-    public GitSync(Uri uri) {
-        this.uri = uri;
-        this.localPath = uri.getQueryParameter(GitRepo.PARAMETER_LOCAL_DIR);
-        this.transport = GitRepo.Transport.valueOf(uri.getQueryParameter(GitRepo.PARAMETER_TRANSPORT));
-        switch (this.transport) {
-            case FILE:
-                this.REMOTE_URL = uri.buildUpon().clearQuery().scheme("file").build().toString();
-                break;
+    public GitSync(GitUri uriRepresentation) {
+        this.uri = uriRepresentation;
+    }
 
-            default:
-                this.REMOTE_URL = uri.buildUpon().clearQuery().scheme("ssh").build().toString();
+
+    public boolean isRepoReadable() {
+        boolean result = false;
+        final LsRemoteCommand lsCmd = new LsRemoteCommand(null);
+//        final List<String> repos = Arrays.asList(
+//                "https://github.com/MuchContact/java.git",
+//                "git@github.com:MuchContact/java.git");
+        lsCmd.setRemote(uri.getGitRemoteUri());
+        try {
+            Log.d("LSGIT",lsCmd.call().toString());
+        } catch (GitAPIException e) {
+            result = false;
         }
+        return result;
     }
 
     public boolean pull() {
         CredentialsProvider allowHosts = getCredentialsProvider();
-
-        File localRepoPath = new File(this.localPath);
-        cloneIfEmpty(allowHosts, localRepoPath);
+        cloneIfEmpty(allowHosts, uri.getLocalRepoDir());
 
         try {
             Log.d(TAG, "Pulling repo");
-            PullCommand pullCommand = Git.open(localRepoPath).pull();
+            PullCommand pullCommand = Git.open(uri.getLocalRepoDir()).pull();
             pullCommand.setCredentialsProvider(allowHosts);
-            if (GitRepo.Transport.SSH == this.transport) {
+            if (isSshTransport()) {
                 pullCommand.setTransportConfigCallback(getTransportConfigCallback());
             }
             PullResult pullResult = pullCommand.call();
@@ -88,41 +88,34 @@ public class GitSync {
     public boolean push() {
         CredentialsProvider allowHosts = getCredentialsProvider();
 
-        File localRepoPath = new File(this.localPath);
-  //      cloneIfEmpty(allowHosts, localRepoPath);
-
         try {
-            Log.d(TAG, "Pulling repo");
-            Git git = Git.open(localRepoPath);
-            String s1 = git.add().addFilepattern("*").call().toString();
-            Log.d(TAG, s1);
+            Log.d(TAG, "Pushing repo");
+            Git git = Git.open(uri.getLocalRepoDir());
+            git.add().addFilepattern(".").call();
 
+            git.commit().setAll(true).setMessage("Changes from Orgzly").call();
 
-            String s = git.commit().setAll(true).setMessage("Changes from Orgzly").call().toString();
-            Log.d(TAG, s);
             PushCommand pushCommand = git.push().setPushAll().setRemote("origin");
 
             pushCommand.setCredentialsProvider(allowHosts);
-            if (GitRepo.Transport.SSH == this.transport) {
+            if (isSshTransport()) {
                 pushCommand.setTransportConfigCallback(getTransportConfigCallback());
             }
             Iterable<PushResult> pushResult = pushCommand.call();
             for (PushResult result : pushResult) {
                 for (RemoteRefUpdate update : result.getRemoteUpdates()) {
-                    Log.d("PUSHER",update.toString());
+                    Log.d(TAG, update.toString());
                 }
             }
-//            if (pullResult.isSuccessful()) {
-//                Log.d(TAG, "pull successful");
-//                // TODO: 07.04.17 push
-//            } else {
-//                // // TODO: 07.04.17 handle problems
-//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return true;
+    }
+
+    private boolean isSshTransport() {
+        return GitUri.Transport.SSH == uri.getTransport();
     }
 
 
@@ -134,15 +127,15 @@ public class GitSync {
     }
 
     private void cloneRepo(CredentialsProvider allowHosts, File localPath) {
-        System.out.println("Cloning from " + REMOTE_URL + " to " + localPath);
+        System.out.println("Cloning from " + uri.getGitRemoteUri() + " to " + localPath);
         Git result = null;
         try {
             StringWriter stringWriter = new StringWriter();
             CloneCommand cmd = Git.cloneRepository()
-                    .setURI(REMOTE_URL)
+                    .setURI(uri.getGitRemoteUri())
                     .setDirectory(localPath)
                     .setCredentialsProvider(allowHosts);
-            if (GitRepo.Transport.SSH == this.transport) {
+            if (isSshTransport()) {
                 cmd.setTransportConfigCallback(getTransportConfigCallback());
             }
             cmd.setProgressMonitor(new TextProgressMonitor(stringWriter)); // TODO: 12.04.17

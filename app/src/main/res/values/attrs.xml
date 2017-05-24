@@ -136,6 +136,8 @@
         <attr name="oic_dropbox_not_linked" format="reference"/>
         <attr name="oic_dropbox_linked" format="reference"/>
 
+        <attr name="oic_git_logo" format="reference" />
+
         <attr name="oic_browse_directory" format="reference"/>
         <attr name="oic_browser_up" format="reference"/>
         <attr name="oic_browser_directory" format="reference"/>
