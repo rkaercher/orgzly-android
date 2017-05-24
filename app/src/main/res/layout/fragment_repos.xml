@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            android:layout_marginBottom="48dp"
+            android:layout_marginBottom="36dp"
             android:drawableTop="?attr/oic_dropbox_not_linked"
             android:text="@string/dropbox"/>
 
@@ -53,8 +53,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
+            android:layout_marginBottom="36dp"
             android:drawableTop="?attr/oic_browse_directory"
             android:text="@string/directory"/>
+
+        <Button
+            android:id="@+id/fragment_repos_git"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:drawableTop="?attr/oic_git_logo"
+            android:text="@string/git"/>
 
         <Space
             android:layout_height="0dp"

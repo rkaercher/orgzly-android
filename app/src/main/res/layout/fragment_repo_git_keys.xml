@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <!-- Input private key. -->
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/fragment_repo_git_private_key_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/fragment_padding"
+        android:layout_marginRight="@dimen/fragment_padding"
+        android:layout_marginTop="@dimen/fragment_padding"
+        app:errorEnabled="true">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/fragment_repo_git_private_key"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/fragment_repo_git_private_key_desc"
+            android:imeOptions="actionDone"
+            android:inputType="text" />
+    </android.support.design.widget.TextInputLayout>
+
+
+    <!-- Input public key. -->
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/fragment_repo_git_public_key_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/fragment_padding"
+        android:layout_marginRight="@dimen/fragment_padding"
+        android:layout_marginTop="@dimen/fragment_padding"
+        app:errorEnabled="true">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/fragment_repo_git_public_key"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/fragment_repo_git_public_key_desc"
+            android:imeOptions="actionDone"
+            android:inputType="text" />
+    </android.support.design.widget.TextInputLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/fragment_repo_git_generate_keys"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/fragment_padding"
+            android:layout_marginLeft="@dimen/fragment_padding"
+            android:layout_marginRight="@dimen/fragment_padding"
+            android:layout_marginStart="@dimen/fragment_padding"
+            android:layout_weight="1"
+            android:text="@string/generate_keys" />
+
+        <Button
+            android:id="@+id/fragment_repo_git_test_login"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/fragment_padding"
+            android:layout_marginLeft="@dimen/fragment_padding"
+            android:layout_marginRight="@dimen/fragment_padding"
+            android:layout_marginStart="@dimen/fragment_padding"
+            android:layout_weight="1"
+            android:text="@string/test_login" />
+
+    </LinearLayout>
+</LinearLayout>

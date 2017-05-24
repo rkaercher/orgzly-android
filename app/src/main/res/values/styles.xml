@@ -150,6 +150,8 @@
         <item name="oic_browser_directory">@drawable/ic_folder_open_black_24dp</item>
         <item name="oic_browser_file">@drawable/ic_insert_drive_file_black_24dp</item>
 
+        <item name="oic_git_logo">@drawable/ic_git_icon_black</item>
+        
         <item name="oic_item_alpha">0.55</item>
 
         <item name="oic_fragment_book_cycle_visibility">@drawable/ic_unfold_more_black_24dp</item>
@@ -306,6 +308,8 @@
         <item name="oic_browser_up">@drawable/ic_keyboard_arrow_up_white_24dp</item>
         <item name="oic_browser_directory">@drawable/ic_folder_open_white_24dp</item>
         <item name="oic_browser_file">@drawable/ic_insert_drive_file_white_24dp</item>
+
+        <item name="oic_git_logo">@drawable/ic_git_icon_white</item>
 
         <item name="oic_item_alpha">0.7</item>
 

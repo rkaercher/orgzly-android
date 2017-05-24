@@ -8,44 +8,20 @@ import com.orgzly.android.sync.GitSync;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 
-public class GitRepo extends LocalDirectoryBasedRepo {
+class GitRepo extends LocalDirectoryBasedRepo {
     private static final String TAG = GitRepo.class.getName();
 
-    public static final String SCHEME = "git";
-    public static final String PARAMETER_LOCAL_DIR = "PARAMETER_LOCAL_DIR";
-    public static final String PARAMETER_PRIVATE_KEY = "PARAMETER_PRIVATE_KEY";
-    public static final String PARAMETER_PUBLIC_KEY = "PARAMETER_PUBLIC_KEY";
-    public static final String PARAMETER_TRANSPORT = "PARAMETER_TRANSPORT";
-    public static final String PARAMETER_FILEPATH = "PARAMETER_FILEPATH";
-
-
-    public enum Transport {
-        SSH,
-        HTTPS,
-        FILE
-    }
-
-    private final File localDir;
-    private final String gitUri;
-    private final String privateKey;
-    private final String publicKey;
-    private final Uri uriRepresentation;
+    private final GitUri uriRepresentation;
 
     private final GitSync syncer;
 
-    public GitRepo(Context context, String uriString) {
-        uriRepresentation = Uri.parse(uriString);
-        localDir = new File(uriRepresentation.getQueryParameter(PARAMETER_LOCAL_DIR));
-        gitUri = uriRepresentation.buildUpon().clearQuery().scheme("ssh").build().toString();
-        privateKey = uriRepresentation.getQueryParameter(PARAMETER_PRIVATE_KEY);
-        publicKey = uriRepresentation.getQueryParameter(PARAMETER_PUBLIC_KEY);
+    GitRepo(Context context, String uriString) {
+        uriRepresentation = new GitUri(uriString);
         syncer = new GitSync(uriRepresentation);
-//        GitSync gitSync = new GitSync(Uri.parse("ssh://git@192.168.1.56:223/syncorg/essential-org"));
-
     }
+
 
     @Override
     public boolean requiresConnection() {
@@ -54,22 +30,21 @@ public class GitRepo extends LocalDirectoryBasedRepo {
 
     @Override
     public Uri getUri() {
-        return uriRepresentation;
-    }
-
-    @Override
-    public VersionedRook retrieveBook(Uri uri, File destination) throws IOException {
-        return null;
+        return uriRepresentation.getUri();
     }
 
     @Override
     public VersionedRook storeBook(File file, String fileName) throws IOException {
-        return null;
+        VersionedRook result = super.storeBook(file, fileName);
+        syncer.push();
+        return result;
     }
 
     @Override
     public VersionedRook renameBook(Uri from, String name) throws IOException {
-        return null;
+        VersionedRook result = super.renameBook(from, name);
+        syncer.push();
+        return result;
     }
 
 
@@ -86,17 +61,17 @@ public class GitRepo extends LocalDirectoryBasedRepo {
 
     @Override
     protected Uri getRookUri(File rookFile) {
-       return getUri().buildUpon().appendQueryParameter(PARAMETER_FILEPATH, rookFile.getAbsolutePath()).build();
+        return getUri().buildUpon().appendQueryParameter(GitUri.PARAMETER_FILEPATH, rookFile.getAbsolutePath()).build();
     }
 
     @NonNull
     @Override
     protected File getFileForUri(Uri uri) {
-        return new File(uri.getQueryParameter(PARAMETER_FILEPATH));
+        return new File(uri.getQueryParameter(GitUri.PARAMETER_FILEPATH));
     }
 
     @Override
     public File getLocalDirectory() {
-        return localDir;
+        return uriRepresentation.getLocalRepoDir();
     }
 }
