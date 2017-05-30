@@ -48,7 +48,7 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
      */
     public static final String FRAGMENT_TAG = GitRepoFragment.class.getName();
     private String mLocalPath;
-    private Uri mRemoteUri;
+    private GitUri mRemoteUri;
 
     private RepoFragmentListener mListener;
 
@@ -111,7 +111,8 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
 //        });
 
         remoteUriText = (EditText) view.findViewById(R.id.fragment_repo_git_remote_uri);
-
+        mRemoteUri = new GitUri();
+        setFromArgument(); // TODO find out when this should not be called
 
 //        if (savedInstanceState == null && TextUtils.isEmpty(localDirectoryText.getText()) && mLocalPath == null) {
 //            setFromArgument();
@@ -126,7 +127,7 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
 
 
             Uri parsed = Uri.parse(ReposClient.getUrl(getActivity(), repoId));
-            mRemoteUri = parsed.buildUpon().clearQuery().build();
+            mRemoteUri = new GitUri(parsed);
             mLocalPath = parsed.getQueryParameter(GitUri.PARAMETER_LOCAL_DIR);
 
         }
@@ -251,12 +252,9 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
 //            directoryInputLayout.setError(null);
 //        }
 
-        Uri uri = Uri.parse(uriString);
-        uri.buildUpon().appendQueryParameter(GitUri.PARAMETER_LOCAL_DIR, localDirString);
-
+        Uri uri = mRemoteUri.getUri();
 
         //   GitSync gitSync = new GitSync(Uri.parse("ssh://git@192.168.1.56:223/syncorg/essential-org"));
-
 
         Repo repo = RepoFactory.getFromUri(getActivity(), uri);
 
@@ -286,25 +284,22 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
 
     @Override
     public void updateFileUri(Uri uri, String TAG) {
+        this.localDirectoryText.setText(uri.getPath());
         this.mLocalPath = uri.getPath();
+        this.mRemoteUri.setLocalRepoDir(uri.getPath());
     }
 
     @Override
     public void onItemInstantiation(int viewId, View view) {
         switch (viewId) {
             case GitRepoFragmentViewAdapter.MAIN_VIEW:
-                directoryInputLayout = (TextInputLayout) view.findViewById(R.id.fragment_repo_git_local_directory_input_layout);
+             //   directoryInputLayout = (TextInputLayout) view.findViewById(R.id.fragment_repo_git_local_directory_input_layout);
 
                 localDirectoryText = (EditText) view.findViewById(R.id.fragment_repo_git_local_directory);
                 MiscUtils.clearErrorOnTextChange(localDirectoryText, directoryInputLayout);
                 Spinner spinner = (Spinner) view.findViewById(R.id.git_auth_method_spinner);
                 spinner.setAdapter(new ArrayAdapter<>(this.getContext(), R.layout.support_simple_spinner_dropdown_item, Arrays.asList("Public Key", "User/Password")));
-                view.findViewById(R.id.fragment_repo_git_edit_keys).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        viewPager.setCurrentItem(GitRepoFragmentViewAdapter.KEYS_VIEW, true);
-                    }
-                });
+
                 setupDirectoryBrowser(view);
                 break;
             case GitRepoFragmentViewAdapter.KEYS_VIEW:
@@ -340,15 +335,15 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
         view.findViewById(R.id.fragment_repo_git_test_login).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                AsyncTask<String, String, Boolean> asyncTask = new AsyncTask<String, String, SshUtil.SshKeys>() {
+                AsyncTask<String, String, Boolean> asyncTask = new AsyncTask<String, String, Boolean>() {
                     @Override
                     protected Boolean doInBackground(String... params) {
-                        GitSync sync;
+                        GitSync sync = new GitSync(new GitUri(getUri()));
                         return sync.isRepoReadable();
                     }
 
                     @Override
-                    protected void onPostExecute(SshUtil.SshKeys sshKeys) {
+                    protected void onPostExecute(Boolean isRepoReadable) {
 
                     }
                 };

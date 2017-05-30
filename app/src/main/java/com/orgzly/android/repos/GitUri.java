@@ -74,4 +74,8 @@ public class GitUri implements Serializable {
     public Uri getUri() {
         return uri;
     }
+
+    public void setLocalRepoDir(String localRepoDir) {
+        this.localRepoDir = new File(localRepoDir);
+    }
 }

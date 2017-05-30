@@ -17,8 +17,13 @@
                 android:targetPackage="com.orgzly"
                 android:targetClass="com.orgzly.android.ui.ReposActivity"/>
         </Preference>
+        <CheckBoxPreference
+            android:title="@string/sync_after_preference_title"
+            android:key="@string/pref_key_sync_after"
+            android:summary="@string/sync_after_summary"
+            android:defaultValue="@bool/pref_default_value_sync_after"
+            />
     </PreferenceCategory>
-
     <PreferenceCategory android:title="@string/look_and_feel">
         <com.orgzly.android.prefs.ListPreferenceWithValueAsSummary
             android:key="@string/pref_key_color_scheme"
@@ -199,13 +204,7 @@
     </PreferenceCategory>
 
 
-        <CheckBoxPreference
-            android:title="@string/sync_after_preference_title"
-            android:key="@string/pref_key_sync_after"
-            android:summary="@string/sync_after_summary"
-            android:defaultValue="@bool/pref_default_value_sync_after"
-            />
-    </PreferenceCategory>
+
 
     <PreferenceCategory android:title="@string/prefs_title_notifications">
         <CheckBoxPreference
@@ -218,6 +217,7 @@
             android:key="@string/pref_key_use_reminders_for_scheduled_times"
             android:title="@string/pref_title_scheduled_times"
             android:defaultValue="@bool/pref_default_value_use_reminders_for_scheduled_times"/>
+    </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/app">
         <Preference
