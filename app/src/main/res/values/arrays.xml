@@ -22,4 +22,9 @@
         <item>@string/repeater_description_restart</item>
     </string-array>
 
+    <string-array name="git_repo_auth_types">
+        <item>@string/git_repo_auth_type_key</item>
+        <item>@string/git_repo_auth_type_password</item>
+    </string-array>
+
 </resources>

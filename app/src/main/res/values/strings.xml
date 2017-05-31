@@ -429,4 +429,7 @@
     <string name="generate_keys">Generate Keys</string>
     <string name="git_auth_method">Authentication Method</string>
     <string name="edit_credentials">Edit Credentials</string>
+    <string name="copy_pubkey_to_clipboard">Copy Public Key</string>
+    <string name="git_repo_auth_type_key">SSH Keypair</string>
+    <string name="git_repo_auth_type_password">User/Password</string>
 </resources>

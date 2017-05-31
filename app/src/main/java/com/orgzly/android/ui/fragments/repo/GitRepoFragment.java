@@ -1,25 +1,30 @@
 package com.orgzly.android.ui.fragments.repo;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.TextInputLayout;
-import android.support.v4.view.ViewPager;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.ContextMenu;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.orgzly.BuildConfig;
 import com.orgzly.R;
@@ -32,13 +37,10 @@ import com.orgzly.android.ui.CommonActivity;
 import com.orgzly.android.ui.util.ActivityUtils;
 import com.orgzly.android.util.AppPermissions;
 import com.orgzly.android.util.LogUtils;
-import com.orgzly.android.util.MiscUtils;
 import com.orgzly.android.util.SshUtil;
 
-import java.util.Arrays;
 
-
-public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFileUri, GitRepoFragmentViewAdapter.InstantiationListener {
+public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFileUri, AdapterView.OnItemSelectedListener {
     private static final String TAG = GitRepoFragment.class.getName();
 
     private static final String ARG_REPO_ID = "repo_id";
@@ -47,15 +49,22 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
      * Name used for {@link android.app.FragmentManager}.
      */
     public static final String FRAGMENT_TAG = GitRepoFragment.class.getName();
+    private static final int GIT_AUTH_TYPE_SSH_KEYS = 0;
+    private static final int GIT_AUTH_TYPE_USER_PASSWORD = 1;
     private String mLocalPath;
     private GitUri mRemoteUri;
 
     private RepoFragmentListener mListener;
 
     private TextInputLayout directoryInputLayout;
-    private EditText localDirectoryText;
+    private TextView localDirectoryText;
     private EditText remoteUriText;
-    private ViewPager viewPager;
+
+    private Button copyToClipboardButton;
+    private Spinner authMethodSpinner;
+    private View publicKeyControls;
+    private View passwordControls;
+    private View testLoginButton;
 
     public static GitRepoFragment getInstance() {
         return new GitRepoFragment();
@@ -94,10 +103,6 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_repo_git, container, false);
 
-        viewPager = (ViewPager) view.findViewById(R.id.viewpager);
-        viewPager.setAdapter(new GitRepoFragmentViewAdapter(this.getContext(), this));
-
-
         // Not working when done in XML
 //        localDirectoryText.setHorizontallyScrolling(false);
 //        localDirectoryText.setMaxLines(3);
@@ -109,14 +114,50 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
 //                return true;
 //            }
 //        });
-
-        remoteUriText = (EditText) view.findViewById(R.id.fragment_repo_git_remote_uri);
         mRemoteUri = new GitUri();
+        remoteUriText = (EditText) view.findViewById(R.id.fragment_repo_git_remote_uri);
+        remoteUriText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                mRemoteUri.setGitRemoteUri(editable.toString());
+            }
+        });
+
         setFromArgument(); // TODO find out when this should not be called
 
 //        if (savedInstanceState == null && TextUtils.isEmpty(localDirectoryText.getText()) && mLocalPath == null) {
 //            setFromArgument();
 //        }
+
+        //   directoryInputLayout = (TextInputLayout) view.findViewById(R.id.fragment_repo_git_local_directory_input_layout);
+
+        localDirectoryText = (TextView) view.findViewById(R.id.fragment_repo_git_local_directory);
+        //       MiscUtils.clearErrorOnTextChange(localDirectoryText, directoryInputLayout);
+        authMethodSpinner = (Spinner) view.findViewById(R.id.git_auth_method_spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.git_repo_auth_types, R.layout.support_simple_spinner_dropdown_item);
+        authMethodSpinner.setAdapter(adapter);
+        authMethodSpinner.setOnItemSelectedListener(this);
+
+        publicKeyControls = view.findViewById(R.id.git_auth_public_key_controls);
+        passwordControls = view.findViewById(R.id.fragment_repo_git_password_controls);
+
+        setupDirectoryBrowser(view);
+
+        setupGenerateKeysButton(view);
+        setupCopyClipboardButton(view);
+        setupGTestLoginButton(view);
+
+        setUIStates();
 
         return view;
     }
@@ -244,13 +285,13 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
 
         String uriString = remoteUriText.getText().toString().trim();
         String localDirString = localDirectoryText.getText().toString().trim();
-//
-//        if (TextUtils.isEmpty(uriString)) {
-//            directoryInputLayout.setError(getString(R.string.can_not_be_empty));
-//            return;
-//        } else {
-//            directoryInputLayout.setError(null);
-//        }
+
+        if (TextUtils.isEmpty(uriString)) {
+            directoryInputLayout.setError(getString(R.string.can_not_be_empty));
+            return;
+        } else {
+            directoryInputLayout.setError(null);
+        }
 
         Uri uri = mRemoteUri.getUri();
 
@@ -287,30 +328,10 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
         this.localDirectoryText.setText(uri.getPath());
         this.mLocalPath = uri.getPath();
         this.mRemoteUri.setLocalRepoDir(uri.getPath());
+
     }
 
-    @Override
-    public void onItemInstantiation(int viewId, View view) {
-        switch (viewId) {
-            case GitRepoFragmentViewAdapter.MAIN_VIEW:
-             //   directoryInputLayout = (TextInputLayout) view.findViewById(R.id.fragment_repo_git_local_directory_input_layout);
-
-                localDirectoryText = (EditText) view.findViewById(R.id.fragment_repo_git_local_directory);
-                MiscUtils.clearErrorOnTextChange(localDirectoryText, directoryInputLayout);
-                Spinner spinner = (Spinner) view.findViewById(R.id.git_auth_method_spinner);
-                spinner.setAdapter(new ArrayAdapter<>(this.getContext(), R.layout.support_simple_spinner_dropdown_item, Arrays.asList("Public Key", "User/Password")));
-
-                setupDirectoryBrowser(view);
-                break;
-            case GitRepoFragmentViewAdapter.KEYS_VIEW:
-                final EditText privateKeyField = (EditText) view.findViewById(R.id.fragment_repo_git_private_key);
-                final EditText publicKeyField = (EditText) view.findViewById(R.id.fragment_repo_git_public_key);
-                setupGenerateKeysButton(view, privateKeyField, publicKeyField);
-                setupGTestLoginButton(view);
-        }
-    }
-
-    private void setupGenerateKeysButton(View view, final EditText privateKeyField, final EditText publicKeyField) {
+    private void setupGenerateKeysButton(View view) {
         view.findViewById(R.id.fragment_repo_git_generate_keys).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
@@ -322,8 +343,10 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
 
                     @Override
                     protected void onPostExecute(SshUtil.SshKeys sshKeys) {
-                        publicKeyField.setText(sshKeys.getPublicKey());
-                        privateKeyField.setText(sshKeys.getPrivateKey());
+                        mRemoteUri.setPrivateKey(sshKeys.getPrivateKey());
+                        mRemoteUri.setPublicKey(sshKeys.getPublicKey());
+                        copyPubkeyToClipboardWithNotify();
+                        setUIStates();
                     }
                 };
                 asyncTask.execute();
@@ -331,14 +354,48 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
         });
     }
 
+    private void copyPubkeyToClipboardWithNotify() {
+        ClipboardManager cm = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clipData = ClipData.newPlainText("Orgzly Pubkey", mRemoteUri.getPublicKey());
+        cm.setPrimaryClip(clipData);
+        Toast.makeText(getContext(), "Public key copied to clipboard", Toast.LENGTH_SHORT).show();
+    }
+
+    private void setVisibleIfAuthmethodMatches(View view, int authType) {
+        view.setVisibility(authMethodSpinner.getSelectedItemPosition() == authType ? View.VISIBLE : View.GONE);
+    }
+
+    private void setUIStates() {
+        copyToClipboardButton.setEnabled(mRemoteUri.hasKeys());
+
+        setVisibleIfAuthmethodMatches(publicKeyControls, GIT_AUTH_TYPE_SSH_KEYS);
+        setVisibleIfAuthmethodMatches(passwordControls, GIT_AUTH_TYPE_USER_PASSWORD);
+
+        testLoginButton.setEnabled(areLoginCredentialsComplete());
+    }
+
+    private boolean areLoginCredentialsComplete() {
+        if (!mRemoteUri.hasRemoteUri()) {
+            return false;
+        }
+        switch (authMethodSpinner.getSelectedItemPosition()) {
+            case GIT_AUTH_TYPE_SSH_KEYS:
+                return mRemoteUri.hasKeys();
+            case GIT_AUTH_TYPE_USER_PASSWORD:
+                return mRemoteUri.hasPassword();
+        }
+        return false;
+    }
+
     private void setupGTestLoginButton(View view) {
-        view.findViewById(R.id.fragment_repo_git_test_login).setOnClickListener(new View.OnClickListener() {
+        testLoginButton = view.findViewById(R.id.fragment_repo_git_test_login);
+        testLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
                 AsyncTask<String, String, Boolean> asyncTask = new AsyncTask<String, String, Boolean>() {
                     @Override
                     protected Boolean doInBackground(String... params) {
-                        GitSync sync = new GitSync(new GitUri(getUri()));
+                        GitSync sync = new GitSync(mRemoteUri);
                         return sync.isRepoReadable();
                     }
 
@@ -348,6 +405,16 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
                     }
                 };
                 asyncTask.execute();
+            }
+        });
+    }
+
+    private void setupCopyClipboardButton(View view) {
+        copyToClipboardButton = (Button) view.findViewById(R.id.fragment_repo_git_copy_pubkey);
+        copyToClipboardButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                copyPubkeyToClipboardWithNotify();
             }
         });
     }
@@ -367,5 +434,15 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
                 }
             }
         });
+    }
+
+    // for auth type spinner
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        setUIStates();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
     }
 }

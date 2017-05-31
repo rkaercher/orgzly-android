@@ -51,11 +51,20 @@ public class GitSync {
 //        final List<String> repos = Arrays.asList(
 //                "https://github.com/MuchContact/java.git",
 //                "git@github.com:MuchContact/java.git");
-        lsCmd.setRemote(uri.getGitRemoteUri());
+        lsCmd.setRemote("ssh://" + uri.getGitRemoteUri()); // todo put in gituri class
+        lsCmd.setCredentialsProvider(getCredentialsProvider());
+        if (isSshTransport()) {
+            lsCmd.setTransportConfigCallback(getTransportConfigCallback());
+        }
         try {
-            Log.d("LSGIT",lsCmd.call().toString());
+            String msg = lsCmd.call().toString();
+            Log.d("LSGIT", msg);
         } catch (GitAPIException e) {
             result = false;
+            Log.d("LSGIT", "gone wrong", e);
+        } catch (Exception e) {
+            result = false;
+            Log.d("LSGIT", "gone wrong2", e);
         }
         return result;
     }
@@ -132,7 +141,7 @@ public class GitSync {
         try {
             StringWriter stringWriter = new StringWriter();
             CloneCommand cmd = Git.cloneRepository()
-                    .setURI(uri.getGitRemoteUri())
+                    .setURI("ssh://" + uri.getGitRemoteUri())
                     .setDirectory(localPath)
                     .setCredentialsProvider(allowHosts);
             if (isSshTransport()) {
@@ -172,6 +181,7 @@ public class GitSync {
             public void configure(Transport transport) {
                 SshTransport sshTransport = (SshTransport) transport;
                 sshTransport.setSshSessionFactory(sshSessionFactory);
+
             }
 
         };
