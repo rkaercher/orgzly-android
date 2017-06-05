@@ -143,6 +143,8 @@
         <attr name="oic_browser_directory" format="reference"/>
         <attr name="oic_browser_file" format="reference"/>
 
+        <attr name="oic_test_git_repo" format="reference" />
+
         <attr name="oic_item_alpha" format="float"/>
 
         <attr name="oic_fragment_book_cycle_visibility" format="reference"/>

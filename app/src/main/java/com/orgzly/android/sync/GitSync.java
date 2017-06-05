@@ -40,17 +40,32 @@ public class GitSync {
 
     private String TAG = GitSync.class.getName();
 
+    public class GitResult {
+        private final boolean success;
+        private final String errorMessage;
+
+        public GitResult(boolean success, String errorMessage) {
+            this.success = success;
+            this.errorMessage = errorMessage;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+    }
+
     public GitSync(GitUri uriRepresentation) {
         this.uri = uriRepresentation;
     }
 
 
-    public boolean isRepoReadable() {
-        boolean result = false;
+    public GitResult isRepoReadable() {
+        GitResult result = null;
         final LsRemoteCommand lsCmd = new LsRemoteCommand(null);
-//        final List<String> repos = Arrays.asList(
-//                "https://github.com/MuchContact/java.git",
-//                "git@github.com:MuchContact/java.git");
         lsCmd.setRemote("ssh://" + uri.getGitRemoteUri()); // todo put in gituri class
         lsCmd.setCredentialsProvider(getCredentialsProvider());
         if (isSshTransport()) {
@@ -59,12 +74,9 @@ public class GitSync {
         try {
             String msg = lsCmd.call().toString();
             Log.d("LSGIT", msg);
-        } catch (GitAPIException e) {
-            result = false;
-            Log.d("LSGIT", "gone wrong", e);
-        } catch (Exception e) {
-            result = false;
-            Log.d("LSGIT", "gone wrong2", e);
+            result = new GitResult(true, null);
+        } catch ( Exception e) {
+            result = new GitResult(false, e.getMessage());
         }
         return result;
     }

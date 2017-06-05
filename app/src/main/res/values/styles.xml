@@ -151,6 +151,8 @@
         <item name="oic_browser_file">@drawable/ic_insert_drive_file_black_24dp</item>
 
         <item name="oic_git_logo">@drawable/ic_git_icon_black</item>
+
+        <item name="oic_test_git_repo">@drawable/ic_check_circle_black_24dp</item>
         
         <item name="oic_item_alpha">0.55</item>
 

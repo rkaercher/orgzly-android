@@ -139,16 +139,33 @@
                 android:padding="@dimen/fragment_padding"/>
         </LinearLayout>
 
-        <Button
-            android:id="@+id/fragment_repo_git_test_login"
+        <!-- Test repository button. -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginEnd="@dimen/fragment_padding"
-            android:layout_marginLeft="@dimen/fragment_padding"
-            android:layout_marginRight="@dimen/fragment_padding"
-            android:layout_marginStart="@dimen/fragment_padding"
-            android:layout_weight="1"
-            android:text="@string/test_login" />
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/fragment_padding"
+            android:gravity="center_vertical"
+            android:minHeight="48dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/fragment_repo_git_test_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/browse"
+                android:src="?attr/oic_test_git_repo" />
+
+            <Button
+                android:id="@+id/fragment_repo_git_test_login"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/fragment_padding"
+                android:layout_marginLeft="@dimen/fragment_padding"
+                android:layout_marginRight="@dimen/fragment_padding"
+                android:layout_marginStart="@dimen/fragment_padding"
+                android:text="Test Repo Connection" />
+
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

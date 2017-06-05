@@ -1,5 +1,6 @@
 package com.orgzly.android.ui.fragments.repo;
 
+import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -65,6 +66,7 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
     private View publicKeyControls;
     private View passwordControls;
     private View testLoginButton;
+    private View testLoginIcon;
 
     public static GitRepoFragment getInstance() {
         return new GitRepoFragment();
@@ -130,6 +132,7 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
             @Override
             public void afterTextChanged(Editable editable) {
                 mRemoteUri.setGitRemoteUri(editable.toString());
+                setUIStates();
             }
         });
 
@@ -150,6 +153,8 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
 
         publicKeyControls = view.findViewById(R.id.git_auth_public_key_controls);
         passwordControls = view.findViewById(R.id.fragment_repo_git_password_controls);
+
+        testLoginIcon = view.findViewById(R.id.fragment_repo_git_test_icon);
 
         setupDirectoryBrowser(view);
 
@@ -271,12 +276,6 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
         }
     }
 
-    private Uri getUri() {
-        String uriString = remoteUriText.getText().toString().trim();
-        if (uriString.isEmpty()) uriString = "none";
-        return Uri.parse(uriString).buildUpon().appendQueryParameter(GitUri.PARAMETER_LOCAL_DIR, "/").build();
-    }
-
     private void save() {
         /* Check for storage permission. */
         if (!AppPermissions.isGrantedOrRequest((CommonActivity) getActivity(), AppPermissions.FOR_LOCAL_REPO)) {
@@ -372,6 +371,7 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
         setVisibleIfAuthmethodMatches(passwordControls, GIT_AUTH_TYPE_USER_PASSWORD);
 
         testLoginButton.setEnabled(areLoginCredentialsComplete());
+        testLoginIcon.setEnabled(areLoginCredentialsComplete());
     }
 
     private boolean areLoginCredentialsComplete() {
@@ -392,16 +392,32 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
         testLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                AsyncTask<String, String, Boolean> asyncTask = new AsyncTask<String, String, Boolean>() {
+                AsyncTask<String, String, GitSync.GitResult> asyncTask = new AsyncTask<String, String, GitSync.GitResult>() {
+                    private ProgressDialog dlg;
+
                     @Override
-                    protected Boolean doInBackground(String... params) {
+                    protected void onPreExecute() {
+                        dlg = new ProgressDialog(getContext());
+                        dlg.setTitle("Checking Repo");
+                        dlg.show();
+                    }
+
+                    @Override
+                    protected GitSync.GitResult doInBackground(String... params) {
                         GitSync sync = new GitSync(mRemoteUri);
                         return sync.isRepoReadable();
                     }
 
                     @Override
-                    protected void onPostExecute(Boolean isRepoReadable) {
-
+                    protected void onPostExecute(GitSync.GitResult repoReadable) {
+                        if (dlg.isShowing()) {
+                            dlg.hide();
+                        }
+                        if (repoReadable.isSuccess()) {
+                            Toast.makeText(getContext(), "Git repository valid!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), "Repository and/or credentials are not valid:\n" + repoReadable.getErrorMessage(), Toast.LENGTH_LONG).show();
+                        }
                     }
                 };
                 asyncTask.execute();
