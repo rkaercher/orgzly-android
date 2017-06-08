@@ -136,7 +136,13 @@ public class GitSync {
     }
 
     private boolean isSshTransport() {
-        return GitUri.Transport.SSH == uri.getTransport();
+        switch (uri.getTransport()) {
+            case SSH_KEYPAIR:
+            case SSH_PASSWORD:
+                return true;
+
+        }
+        return false;
     }
 
 

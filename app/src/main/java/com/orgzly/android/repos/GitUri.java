@@ -14,12 +14,13 @@ public class GitUri implements Serializable {
     public static final String PARAMETER_FILEPATH = "PARAMETER_FILEPATH";
 
     public GitUri() {
-        transport = Transport.SSH;
+        transport = Transport.SSH_KEYPAIR;
     }
 
     public enum Transport {
-        SSH,
-        HTTPS,
+        SSH_KEYPAIR,
+        SSH_PASSWORD,
+        HTTPS_PASSWORD,
         FILE
     }
 
@@ -96,14 +97,30 @@ public class GitUri implements Serializable {
                 appendQueryParameter(PARAMETER_TRANSPORT, transport.toString());
 
         //TODO make conditional
-        builder.appendQueryParameter(PARAMETER_PUBLIC_KEY, publicKey);
-        builder.appendQueryParameter(PARAMETER_PRIVATE_KEY, privateKey);
+        if (Transport.SSH_KEYPAIR.equals(this.transport)) {
+            builder.appendQueryParameter(PARAMETER_PUBLIC_KEY, publicKey);
+            builder.appendQueryParameter(PARAMETER_PRIVATE_KEY, privateKey);
+        }
+
 
         return uri;
     }
 
     public boolean hasKeys() {
         return !OrgStringUtils.isEmpty(privateKey) && !OrgStringUtils.isEmpty(publicKey);
+    }
+
+    public boolean areLoginCredentialsComplete() {
+        if (!hasRemoteUri()) {
+            return false;
+        }
+        switch (this.transport) {
+            case SSH_KEYPAIR:
+                return hasKeys();
+            case SSH_PASSWORD:
+                return hasPassword();
+        }
+        return false;
     }
 
     public boolean hasPassword() {
@@ -134,4 +151,7 @@ public class GitUri implements Serializable {
         gitRemoteUri = uriString;
     }
 
+    public void setTransport(Transport transport) {
+        this.transport = transport;
+    }
 }

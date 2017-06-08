@@ -432,4 +432,6 @@
     <string name="copy_pubkey_to_clipboard">Copy Public Key</string>
     <string name="git_repo_auth_type_key">SSH Keypair</string>
     <string name="git_repo_auth_type_password">User/Password</string>
+    <string name="public_key_copied_to_clipboard">Public key copied to clipboard</string>
+    <string name="orgzly_public_key">Orgzly public key</string>
 </resources>

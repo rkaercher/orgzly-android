@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,6 +8,16 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".android.ui.MainActivity">
+
+    <TextView
+        android:id="@+id/fragment_repo_git_local_directory"
+        style="@style/BigCenteredText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/fragment_repo_external_storage_directory_desc"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:textSize="14sp" />
 
     <!-- Browse button. -->
     <LinearLayout
@@ -38,17 +47,6 @@
 
     </LinearLayout>
 
-    <!-- Input local directory. -->
-    <TextView
-        android:id="@+id/fragment_repo_git_local_directory"
-        style="@style/BigCenteredText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/fragment_repo_external_storage_directory_desc"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        android:textSize="14sp" />
-
 
     <!-- Input remote uri. -->
     <android.support.design.widget.TextInputLayout
@@ -73,8 +71,8 @@
         android:id="@+id/spinner_auth_type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="@dimen/fragment_padding"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="@dimen/fragment_padding">
 
         <TextView
             android:id="@+id/authMethodLabel"
@@ -136,37 +134,20 @@
                 android:layout_height="wrap_content"
                 android:hint="Password"
                 android:inputType="textVisiblePassword"
-                android:padding="@dimen/fragment_padding"/>
+                android:padding="@dimen/fragment_padding" />
         </LinearLayout>
 
         <!-- Test repository button. -->
-        <LinearLayout
+        <Button
+            android:id="@+id/fragment_repo_git_test_login"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/fragment_padding"
-            android:gravity="center_vertical"
-            android:minHeight="48dp"
-            android:orientation="horizontal">
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/fragment_padding"
+            android:layout_marginLeft="@dimen/fragment_padding"
+            android:layout_marginRight="@dimen/fragment_padding"
+            android:layout_marginStart="@dimen/fragment_padding"
+            android:text="Test Repo Connection" />
 
-            <ImageView
-                android:id="@+id/fragment_repo_git_test_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/browse"
-                android:src="?attr/oic_test_git_repo" />
-
-            <Button
-                android:id="@+id/fragment_repo_git_test_login"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="@dimen/fragment_padding"
-                android:layout_marginLeft="@dimen/fragment_padding"
-                android:layout_marginRight="@dimen/fragment_padding"
-                android:layout_marginStart="@dimen/fragment_padding"
-                android:text="Test Repo Connection" />
-
-        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>
-
