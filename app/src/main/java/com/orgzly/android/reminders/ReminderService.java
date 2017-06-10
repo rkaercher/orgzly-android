@@ -6,6 +6,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -45,6 +47,8 @@ public class ReminderService extends IntentService {
     public static final int EVENT_DATA_CHANGED = 1;
     public static final int EVENT_JOB_TRIGGERED = 2;
     public static final int EVENT_UNKNOWN = -1;
+
+    private static final long[] SCHEDULED_NOTE_VIBRATE_PATTERN = new long[] { 500, 50, 50, 300 };
 
     public ReminderService() {
         super(TAG);
@@ -198,7 +202,7 @@ public class ReminderService extends IntentService {
                     String noteTitle = cursor.getString(ProviderContract.Times.ColumnIndex.NOTE_TITLE);
                     String orgTimestampString = cursor.getString(ProviderContract.Times.ColumnIndex.ORG_TIMESTAMP_STRING);
 
-                    OrgDateTime orgDateTime = OrgDateTime.getInstance(orgTimestampString);
+                    OrgDateTime orgDateTime = OrgDateTime.parse(orgTimestampString);
 
                     /* Skip if it's done-type state. */
                     if (noteState == null || !AppPreferences.doneKeywordsSet(context).contains(noteState)) {
@@ -279,9 +283,16 @@ public class ReminderService extends IntentService {
                     .setColor(ContextCompat.getColor(context, R.color.notification))
                     .setSmallIcon(R.drawable.cic_orgzly_notification);
 
+            /* Set vibration. */
+            if (AppPreferences.remindersVibrate(context)) {
+                builder.setVibrate(SCHEDULED_NOTE_VIBRATE_PATTERN);
+            }
+
             /* Set notification sound. */
-//            Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-//            builder.setSound(alarmSound);
+            if (AppPreferences.remindersSound(context)) {
+                Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                builder.setSound(sound);
+            }
 
             builder.setContentTitle(note.title);
             builder.setContentText(line);

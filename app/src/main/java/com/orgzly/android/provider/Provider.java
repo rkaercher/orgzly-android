@@ -1196,8 +1196,8 @@ public class Provider extends ContentProvider {
 
                 stateSetOp.setState(state,
                         cursor.getString(3),
-                        OrgRange.getInstanceOrNull(cursor.getString(1)),
-                        OrgRange.getInstanceOrNull(cursor.getString(2)));
+                        OrgRange.parseOrNull(cursor.getString(1)),
+                        OrgRange.parseOrNull(cursor.getString(2)));
 
                 ContentValues values = new ContentValues();
 
@@ -1476,7 +1476,7 @@ public class Provider extends ContentProvider {
                             long noteId = db.insertOrThrow(DbNote.TABLE, null, values);
 
                             /* Insert note's properties. */
-                            int i = 0;
+                            int pos = 1;
                             for (OrgProperty property: node.getHead().getProperties()) {
                                 Long nameId = propertyNames.get(property.getName());
                                 if (nameId == null) {
@@ -1492,7 +1492,7 @@ public class Provider extends ContentProvider {
 
                                 long propertyId = DbProperty.getOrInsert(db, nameId, valueId);
 
-                                DbNoteProperty.getOrInsert(db, noteId, i, propertyId);
+                                DbNoteProperty.getOrInsert(db, noteId, pos++, propertyId);
                             }
 
                             /*
@@ -1570,7 +1570,7 @@ public class Provider extends ContentProvider {
         if (values.containsKey(ProviderContract.Notes.UpdateParam.SCHEDULED_STRING)) {
             String str = values.getAsString(ProviderContract.Notes.UpdateParam.SCHEDULED_STRING);
             if (! TextUtils.isEmpty(str)) {
-                values.put(DbNote.Column.SCHEDULED_RANGE_ID, getOrInsertOrgRange(db, OrgRange.getInstance(str)));
+                values.put(DbNote.Column.SCHEDULED_RANGE_ID, getOrInsertOrgRange(db, OrgRange.parse(str)));
             } else {
                 values.putNull(DbNote.Column.SCHEDULED_RANGE_ID);
             }
@@ -1581,7 +1581,7 @@ public class Provider extends ContentProvider {
         if (values.containsKey(ProviderContract.Notes.UpdateParam.DEADLINE_STRING)) {
             String str = values.getAsString(ProviderContract.Notes.UpdateParam.DEADLINE_STRING);
             if (! TextUtils.isEmpty(str)) {
-                values.put(DbNote.Column.DEADLINE_RANGE_ID, getOrInsertOrgRange(db, OrgRange.getInstance(str)));
+                values.put(DbNote.Column.DEADLINE_RANGE_ID, getOrInsertOrgRange(db, OrgRange.parse(str)));
             } else {
                 values.putNull(DbNote.Column.DEADLINE_RANGE_ID);
             }
@@ -1592,7 +1592,7 @@ public class Provider extends ContentProvider {
         if (values.containsKey(ProviderContract.Notes.UpdateParam.CLOSED_STRING)) {
             String str = values.getAsString(ProviderContract.Notes.UpdateParam.CLOSED_STRING);
             if (! TextUtils.isEmpty(str)) {
-                values.put(DbNote.Column.CLOSED_RANGE_ID, getOrInsertOrgRange(db, OrgRange.getInstance(str)));
+                values.put(DbNote.Column.CLOSED_RANGE_ID, getOrInsertOrgRange(db, OrgRange.parse(str)));
             } else {
                 values.putNull(DbNote.Column.CLOSED_RANGE_ID);
             }
@@ -1603,7 +1603,7 @@ public class Provider extends ContentProvider {
         if (values.containsKey(ProviderContract.Notes.UpdateParam.CLOCK_STRING)) {
             String str = values.getAsString(ProviderContract.Notes.UpdateParam.CLOCK_STRING);
             if (! TextUtils.isEmpty(str)) {
-                values.put(DbNote.Column.CLOCK_RANGE_ID, getOrInsertOrgRange(db, OrgRange.getInstance(str)));
+                values.put(DbNote.Column.CLOCK_RANGE_ID, getOrInsertOrgRange(db, OrgRange.parse(str)));
             } else {
                 values.putNull(DbNote.Column.CLOCK_RANGE_ID);
             }
