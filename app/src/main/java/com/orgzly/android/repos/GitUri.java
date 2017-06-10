@@ -25,6 +25,7 @@ public class GitUri implements Serializable {
     }
 
     public static final String SCHEME = "git";
+    public static final String PARAMETER_REMOTE_URI = "PARAMETER_REMOTE_URI";
     public static final String PARAMETER_LOCAL_DIR = "PARAMETER_LOCAL_DIR";
     public static final String PARAMETER_PRIVATE_KEY = "PARAMETER_PRIVATE_KEY";
     public static final String PARAMETER_PUBLIC_KEY = "PARAMETER_PUBLIC_KEY";
@@ -33,7 +34,7 @@ public class GitUri implements Serializable {
 
 
     private String gitRemoteUri;
-    private File localRepoDir;
+    private String localRepoDir;
     private String privateKey;
     private String publicKey;
     private Transport transport;
@@ -45,24 +46,24 @@ public class GitUri implements Serializable {
     }
 
     public GitUri(Uri uri) {
-        this.gitRemoteUri = makeGitRemoteUri(uri);
-        this.localRepoDir = new File(uri.getQueryParameter(PARAMETER_LOCAL_DIR));
+        this.localRepoDir = uri.getPath();
         this.publicKey = uri.getQueryParameter(PARAMETER_PUBLIC_KEY);
         this.privateKey = uri.getQueryParameter(PARAMETER_PRIVATE_KEY);
         this.transport = GitUri.Transport.valueOf(uri.getQueryParameter(PARAMETER_TRANSPORT));
         this.password = uri.getQueryParameter(PARAMETER_PASSWORD);
+        this.gitRemoteUri = uri.getQueryParameter(PARAMETER_REMOTE_URI);
     }
 
-    private String makeGitRemoteUri(Uri uri) {
-        switch (this.transport) {
+    private String getScheme(Transport transport) {
+        switch (transport) {
             case FILE:
-                return uri.buildUpon().clearQuery().scheme("file").build().toString();
+                return "file";
             default:
-                return uri.buildUpon().clearQuery().scheme("ssh").build().toString();
+                return "ssh";
         }
     }
 
-    public File getLocalRepoDir() {
+    public String getLocalRepoDir() {
         return localRepoDir;
     }
 
@@ -87,23 +88,29 @@ public class GitUri implements Serializable {
         return gitRemoteUri;
     }
 
-    public Uri getUri() {
-        Uri uri = Uri.parse(gitRemoteUri);
+    public String getGitRemoteUriWithScheme() {
+        return getScheme(this.transport) + "://" + gitRemoteUri;
+    }
 
-        Uri.Builder builder = uri.buildUpon();
-        builder.
-                scheme(SCHEME).
-                appendQueryParameter(PARAMETER_LOCAL_DIR, localRepoDir.getAbsolutePath()).
-                appendQueryParameter(PARAMETER_TRANSPORT, transport.toString());
+    public Uri getOrgzlyUri() {
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme(SCHEME);
+        builder.path(localRepoDir);
+        builder.appendQueryParameter(PARAMETER_LOCAL_DIR, localRepoDir);
+        builder.appendQueryParameter(PARAMETER_TRANSPORT, transport.toString());
+        builder.appendQueryParameter(PARAMETER_REMOTE_URI, gitRemoteUri);
 
-        //TODO make conditional
-        if (Transport.SSH_KEYPAIR.equals(this.transport)) {
-            builder.appendQueryParameter(PARAMETER_PUBLIC_KEY, publicKey);
-            builder.appendQueryParameter(PARAMETER_PRIVATE_KEY, privateKey);
+        switch (transport) {
+            case SSH_KEYPAIR:
+                builder.appendQueryParameter(PARAMETER_PUBLIC_KEY, publicKey);
+                builder.appendQueryParameter(PARAMETER_PRIVATE_KEY, privateKey);
+                break;
+            case SSH_PASSWORD:
+                builder.appendQueryParameter(PARAMETER_PASSWORD, password);
+                break;
         }
 
-
-        return uri;
+        return builder.build();
     }
 
     public boolean hasKeys() {
@@ -114,7 +121,7 @@ public class GitUri implements Serializable {
         if (!hasRemoteUri()) {
             return false;
         }
-        switch (this.transport) {
+        switch (transport) {
             case SSH_KEYPAIR:
                 return hasKeys();
             case SSH_PASSWORD:
@@ -132,7 +139,7 @@ public class GitUri implements Serializable {
     }
 
     public void setLocalRepoDir(String localRepoDir) {
-        this.localRepoDir = new File(localRepoDir);
+        this.localRepoDir = localRepoDir;
     }
 
     public void setPrivateKey(String privateKey) {

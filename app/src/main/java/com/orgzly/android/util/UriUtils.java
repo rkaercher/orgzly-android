@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.support.v4.provider.DocumentFile;
 
 import com.orgzly.android.BookName;
+import com.orgzly.android.repos.GitUri;
 
 import java.util.List;
 
@@ -34,6 +35,9 @@ public class UriUtils {
     }
 
     public static String friendlyUri(String uriString) {
+        if (uriString.startsWith(GitUri.SCHEME)) {
+            return new GitUri(uriString).getGitRemoteUri();
+        }
         return Uri.decode(uriString);
     }
 

@@ -41,7 +41,7 @@ import com.orgzly.android.util.LogUtils;
 import com.orgzly.android.util.SshUtil;
 
 
-public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFileUri, AdapterView.OnItemSelectedListener, View.OnClickListener {
+public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFileUri, AdapterView.OnItemSelectedListener, View.OnClickListener, TextWatcher {
     private static final String TAG = GitRepoFragment.class.getName();
 
     private static final String ARG_REPO_ID = "repo_id";
@@ -66,6 +66,7 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
     private View passwordControls;
     private View testLoginButton;
     private View generateKeysButton;
+    private EditText passwordEditText;
 
     public static GitRepoFragment getInstance() {
         return new GitRepoFragment();
@@ -121,10 +122,11 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
 
         localDirectoryText = (TextView) view.findViewById(R.id.fragment_repo_git_local_directory);
         //       MiscUtils.clearErrorOnTextChange(localDirectoryText, directoryInputLayout);
-        authMethodSpinner = (Spinner) view.findViewById(R.id.git_auth_method_spinner);
+        authMethodSpinner = (Spinner) view.findViewById(R.id.fragment_repo_git_transport_auth_selection_spinner);
 
         publicKeyControls = view.findViewById(R.id.git_auth_public_key_controls);
         passwordControls = view.findViewById(R.id.fragment_repo_git_password_controls);
+        passwordEditText = (EditText) view.findViewById(R.id.fragment_repo_git_password_text);
 
         testLoginButton = view.findViewById(R.id.fragment_repo_git_test_login);
 
@@ -133,13 +135,14 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
 
 
         setupAuthMethodSpinner();
-        view.findViewById(R.id.fragment_repo_git_directory_browse_button).setOnClickListener(this);
+        View directoryBrowserButton = view.findViewById(R.id.fragment_repo_git_directory_browse_button);
+        directoryBrowserButton.setOnClickListener(this);
         copyToClipboardButton.setOnClickListener(this);
 
         generateKeysButton.setOnClickListener(this);
-        setupRemoteUriText();
         testLoginButton.setOnClickListener(this);
-
+        remoteUriText.addTextChangedListener(this);
+        passwordEditText.addTextChangedListener(this);
         setUIStates();
 
         return view;
@@ -151,31 +154,12 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
         authMethodSpinner.setOnItemSelectedListener(this);
     }
 
-    private void setupRemoteUriText() {
-        remoteUriText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                mRemoteUri.setGitRemoteUri(editable.toString());
-                setUIStates();
-            }
-        });
-    }
-
     private void setFromArgument() {
         if (getArguments() != null && getArguments().containsKey(ARG_REPO_ID)) {
             long repoId = getArguments().getLong(ARG_REPO_ID);
             mRemoteUri = new GitUri(ReposClient.getUrl(getActivity(), repoId));
-            mLocalPath = mRemoteUri.getLocalRepoDir().getAbsolutePath();
+            // mLocalPath = mRemoteUri.getLocalRepoDir().getAbsolutePath();
+
         } else {
             mRemoteUri = new GitUri();
         }
@@ -218,6 +202,16 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
         if (mLocalPath != null) {
             localDirectoryText.setText(mLocalPath);
             mLocalPath = null;
+        }
+        localDirectoryText.setText(mRemoteUri.getLocalRepoDir());
+        remoteUriText.setText(mRemoteUri.getGitRemoteUri());
+        switch (mRemoteUri.getTransport()) {
+            case SSH_KEYPAIR:
+                authMethodSpinner.setSelection(GIT_AUTH_TYPE_SSH_KEYS);
+                break;
+            case SSH_PASSWORD:
+                authMethodSpinner.setSelection(GIT_AUTH_TYPE_USER_PASSWORD);
+                break;
         }
 
         /* Check for permissions. */
@@ -287,7 +281,7 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
 //            directoryInputLayout.setError(null);
 //        }
 
-        Uri uri = mRemoteUri.getUri();
+        Uri uri = mRemoteUri.getOrgzlyUri();
 
         Repo repo = RepoFactory.getFromUri(getActivity(), uri);
 
@@ -349,7 +343,7 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
     }
 
     private void setVisibleIfAuthmethodMatches(View view, GitUri.Transport transport) {
-        view.setVisibility(getSelectedTransport().equals(transport) ? View.VISIBLE : View.GONE);
+        view.setVisibility(transport.equals(getSelectedTransport()) ? View.VISIBLE : View.GONE);
     }
 
     private void setUIStates() {
@@ -388,7 +382,8 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
         }
     }
 
-    // for auth type spinner
+    /* OnItemSelectedListener methods for transport/auth method spinner */
+
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
         mRemoteUri.setTransport(getSelectedTransport());
@@ -402,7 +397,7 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.fragment_repo_directory_browse_button:
+            case R.id.fragment_repo_git_directory_browse_button:
                 openDirectoryBrowser();
                 break;
             case R.id.fragment_repo_git_test_login:
@@ -417,4 +412,28 @@ public class GitRepoFragment extends RepoFragment implements RepoFragmentWithFil
         }
     }
 
+    /* End of OnItemSelectedListener methods */
+
+    /* TextWatcher methods */
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable) {
+        if (remoteUriText.getEditableText() == editable) {
+            mRemoteUri.setGitRemoteUri(editable.toString());
+        } else if (passwordEditText.getEditableText() == editable) {
+            mRemoteUri.setPassword(editable.toString());
+        }
+        setUIStates();
+    }
+    /* end TextWatcher methods */
 }

@@ -66,7 +66,7 @@ public class GitSync {
     public GitResult isRepoReadable() {
         GitResult result = null;
         final LsRemoteCommand lsCmd = new LsRemoteCommand(null);
-        lsCmd.setRemote("ssh://" + uri.getGitRemoteUri()); // todo put in gituri class
+        lsCmd.setRemote(uri.getGitRemoteUriWithScheme());
         lsCmd.setCredentialsProvider(getCredentialsProvider());
         if (isSshTransport()) {
             lsCmd.setTransportConfigCallback(getTransportConfigCallback());
@@ -83,24 +83,26 @@ public class GitSync {
 
     public boolean pull() {
         CredentialsProvider allowHosts = getCredentialsProvider();
-        cloneIfEmpty(allowHosts, uri.getLocalRepoDir());
+        File localRepoDir = new File(uri.getLocalRepoDir());
+        cloneIfEmpty(allowHosts, localRepoDir);
 
         try {
             Log.d(TAG, "Pulling repo");
-            PullCommand pullCommand = Git.open(uri.getLocalRepoDir()).pull();
+            PullCommand pullCommand = Git.open(localRepoDir).pull();
             pullCommand.setCredentialsProvider(allowHosts);
             if (isSshTransport()) {
                 pullCommand.setTransportConfigCallback(getTransportConfigCallback());
             }
             PullResult pullResult = pullCommand.call();
             if (pullResult.isSuccessful()) {
-                Log.d(TAG, "pull successful");
+                Log.d(TAG, "Pull successful.");
                 // TODO: 07.04.17 push
             } else {
+                Log.e(TAG, "Gitrepo pull was not successful.");
                 // // TODO: 07.04.17 handle problems
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Problem during git pull.", e);
         }
 
         return true;
@@ -111,7 +113,7 @@ public class GitSync {
 
         try {
             Log.d(TAG, "Pushing repo");
-            Git git = Git.open(uri.getLocalRepoDir());
+            Git git = Git.open(new File(uri.getLocalRepoDir()));
             git.add().addFilepattern(".").call();
 
             git.commit().setAll(true).setMessage("Changes from Orgzly").call();
@@ -154,12 +156,12 @@ public class GitSync {
     }
 
     private void cloneRepo(CredentialsProvider allowHosts, File localPath) {
-        System.out.println("Cloning from " + uri.getGitRemoteUri() + " to " + localPath);
+        System.out.println("Cloning from " + uri.getGitRemoteUriWithScheme() + " to " + localPath);
         Git result = null;
         try {
             StringWriter stringWriter = new StringWriter();
             CloneCommand cmd = Git.cloneRepository()
-                    .setURI("ssh://" + uri.getGitRemoteUri())
+                    .setURI(uri.getGitRemoteUriWithScheme())
                     .setDirectory(localPath)
                     .setCredentialsProvider(allowHosts);
             if (isSshTransport()) {

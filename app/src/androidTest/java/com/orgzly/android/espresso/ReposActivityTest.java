@@ -141,16 +141,4 @@ public class ReposActivityTest extends OrgzlyTest {
         onView(withId(R.id.fragment_repo_dropbox_directory)).check(matches(withText(localDir)));
     }
 
-    @Test
-    public void testGitRepoSsh() {
-        String localDir = "/Documents/testGitRepo";
-
-        startActivityWithIntent(Intent.ACTION_VIEW, null, null);
-
-        onActionItemClick(R.id.repos_options_menu_item_new, R.string.repos_options_menu_new_repo);
-        onView(withText(R.string.git_repository)).perform(click());
-        onView(withId(R.id.fragment_repo_git_local_directory)).perform(replaceText(localDir));
-
-        onView(withId(R.id.done)).perform(click());
-    }
 }

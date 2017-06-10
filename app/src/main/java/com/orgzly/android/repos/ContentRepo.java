@@ -68,10 +68,10 @@ public class ContentRepo implements Repo {
                     if (BuildConfig.LOG_DEBUG) {
                         LogUtils.d(TAG,
                                 "file.getName()", file.getName(),
-                                "getUri()", getUri(),
-                                "repoDocumentFile.getUri()", repoDocumentFile.getUri(),
+                                "getOrgzlyUri()", getUri(),
+                                "repoDocumentFile.getOrgzlyUri()", repoDocumentFile.getUri(),
                                 "file", file,
-                                "file.getUri()", file.getUri(),
+                                "file.getOrgzlyUri()", file.getUri(),
                                 "file.getParentFile()", file.getParentFile().getUri());
                     }
 

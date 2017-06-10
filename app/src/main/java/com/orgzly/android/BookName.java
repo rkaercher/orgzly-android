@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.support.v4.provider.DocumentFile;
 
+import com.orgzly.android.repos.GitUri;
 import com.orgzly.android.repos.Rook;
 
 import java.util.regex.Matcher;

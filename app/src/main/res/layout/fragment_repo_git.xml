@@ -11,11 +11,11 @@
 
     <TextView
         android:id="@+id/fragment_repo_git_local_directory"
-        style="@style/BigCenteredText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/fragment_padding"
         android:gravity="center"
-        android:text="@string/fragment_repo_external_storage_directory_desc"
+        android:text="@string/fragment_repo_git_storage_directory_desc"
         android:textAppearance="@style/TextAppearance.AppCompat"
         android:textSize="14sp" />
 
@@ -75,79 +75,81 @@
         android:padding="@dimen/fragment_padding">
 
         <TextView
-            android:id="@+id/authMethodLabel"
+            android:id="@+id/fragment_git_transport_auth_selection_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/git_auth_method" />
 
         <Spinner
-            android:id="@+id/git_auth_method_spinner"
+            android:id="@+id/fragment_repo_git_transport_auth_selection_spinner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
     </LinearLayout>
 
+
     <LinearLayout
+        android:id="@+id/git_auth_public_key_controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-
-        <LinearLayout
-            android:id="@+id/git_auth_public_key_controls"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/fragment_repo_git_generate_keys"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="@dimen/fragment_padding"
-                android:layout_marginLeft="@dimen/fragment_padding"
-                android:layout_marginRight="@dimen/fragment_padding"
-                android:layout_marginStart="@dimen/fragment_padding"
-                android:layout_weight="1"
-                android:text="@string/generate_keys" />
-
-            <Button
-                android:id="@+id/fragment_repo_git_copy_pubkey"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginEnd="@dimen/fragment_padding"
-                android:layout_marginLeft="@dimen/fragment_padding"
-                android:layout_marginRight="@dimen/fragment_padding"
-                android:layout_marginStart="@dimen/fragment_padding"
-                android:layout_weight="1"
-                android:text="@string/copy_pubkey_to_clipboard" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/fragment_repo_git_password_controls"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/fragment_repo_git_password_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Password"
-                android:inputType="textVisiblePassword"
-                android:padding="@dimen/fragment_padding" />
-        </LinearLayout>
-
-        <!-- Test repository button. -->
         <Button
-            android:id="@+id/fragment_repo_git_test_login"
+            android:id="@+id/fragment_repo_git_generate_keys"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/fragment_padding"
+            android:layout_marginStart="@dimen/fragment_padding"
+            android:layout_weight="1"
+            android:text="@string/generate_keys" />
+
+        <Button
+            android:id="@+id/fragment_repo_git_copy_pubkey"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginEnd="@dimen/fragment_padding"
             android:layout_marginLeft="@dimen/fragment_padding"
             android:layout_marginRight="@dimen/fragment_padding"
             android:layout_marginStart="@dimen/fragment_padding"
-            android:text="Test Repo Connection" />
+            android:layout_weight="1"
+            android:text="@string/copy_pubkey_to_clipboard" />
 
     </LinearLayout>
 
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/fragment_repo_git_password_controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/fragment_padding"
+        android:layout_marginRight="@dimen/fragment_padding"
+        app:errorEnabled="true">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/fragment_repo_git_password_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:inputType="textVisiblePassword"
+            android:padding="@dimen/fragment_padding" />
+    </android.support.design.widget.TextInputLayout>
+
+    <!-- Test repository button. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/fragment_repo_git_test_login"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/fragment_padding"
+            android:layout_marginLeft="@dimen/fragment_padding"
+            android:layout_marginRight="@dimen/fragment_padding"
+            android:layout_marginStart="@dimen/fragment_padding"
+            android:text="Test Repo Connection" />
+    </LinearLayout>
+
 </LinearLayout>
+
+

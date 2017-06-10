@@ -10,7 +10,7 @@ import java.io.File;
 import java.io.IOException;
 
 
-class GitRepo extends LocalDirectoryBasedRepo {
+public class GitRepo extends LocalDirectoryBasedRepo {
     private static final String TAG = GitRepo.class.getName();
 
     private final GitUri uriRepresentation;
@@ -30,7 +30,7 @@ class GitRepo extends LocalDirectoryBasedRepo {
 
     @Override
     public Uri getUri() {
-        return uriRepresentation.getUri();
+        return uriRepresentation.getOrgzlyUri();
     }
 
     @Override
@@ -61,17 +61,22 @@ class GitRepo extends LocalDirectoryBasedRepo {
 
     @Override
     protected Uri getRookUri(File rookFile) {
-        return getUri().buildUpon().appendQueryParameter(GitUri.PARAMETER_FILEPATH, rookFile.getAbsolutePath()).build();
+        return getUri().buildUpon().path(rookFile.getAbsolutePath()).build();
     }
 
     @NonNull
     @Override
     protected File getFileForUri(Uri uri) {
-        return new File(uri.getQueryParameter(GitUri.PARAMETER_FILEPATH));
+        return new File(uri.getPath());
     }
 
     @Override
     public File getLocalDirectory() {
-        return uriRepresentation.getLocalRepoDir();
+        return new File(uriRepresentation.getLocalRepoDir());
+    }
+
+    @Override
+    public String toString() {
+        return "GIT - " + uriRepresentation.getGitRemoteUri();
     }
 }

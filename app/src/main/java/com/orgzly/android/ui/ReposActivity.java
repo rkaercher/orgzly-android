@@ -16,6 +16,7 @@ import com.orgzly.android.repos.ContentRepo;
 import com.orgzly.android.repos.DirectoryRepo;
 import com.orgzly.android.repos.DropboxClient;
 import com.orgzly.android.repos.DropboxRepo;
+import com.orgzly.android.repos.GitRepo;
 import com.orgzly.android.repos.MockRepo;
 import com.orgzly.android.repos.Repo;
 import com.orgzly.android.repos.RepoFactory;
@@ -186,6 +187,9 @@ public class ReposActivity extends CommonActivity
 
         } else if (repo instanceof DirectoryRepo || repo instanceof ContentRepo) {
             displayRepoFragment(DirectoryRepoFragment.getInstance(id), DirectoryRepoFragment.FRAGMENT_TAG);
+
+        } else if (repo instanceof GitRepo) {
+            displayRepoFragment(GitRepoFragment.getInstance(id), GitRepoFragment.FRAGMENT_TAG);
 
         } else {
             showSimpleSnackbarLong(R.string.message_unsupported_repository_type);

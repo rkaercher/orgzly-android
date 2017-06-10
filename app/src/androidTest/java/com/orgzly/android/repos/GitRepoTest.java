@@ -188,13 +188,11 @@ public class GitRepoTest extends OrgzlyTest {
     }
 
     private String getRepoUri() {
-        Uri gitRepoUri = new Uri.Builder()
-                .scheme(GitUri.SCHEME)
-                .path(remoteGitDir.getAbsolutePath())
-                .appendQueryParameter(GitUri.PARAMETER_LOCAL_DIR, targetDir.getAbsolutePath())
-                .appendQueryParameter(GitUri.PARAMETER_TRANSPORT, GitUri.Transport.FILE.name())
-                .build();
-        return gitRepoUri.toString();
+        GitUri uri = new GitUri();
+        uri.setGitRemoteUri(remoteGitDir.getAbsolutePath());
+        uri.setLocalRepoDir(targetDir.getAbsolutePath());
+        uri.setTransport(GitUri.Transport.FILE);
+        return uri.getOrgzlyUri().toString();
     }
 
 }
